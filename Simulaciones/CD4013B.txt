@@ -1,0 +1,31 @@
+* D-filp-flop with asynchronous set and reset
+* CP->Q Tpd 150n
+* R/S->Q Tpd 150n
+* CP/R/S Tw 50n
+* D->CP Ts 20n
+* D->CP Th 0n
+* R,S Trem 40n
+.SUBCKT CD4013B  S C D R Q QN  VDD VGND  vdd1={vdd} speed1={speed} tripdt1={tripdt}
+.param td1=1e-9*(150-10-40-10)*5/{vdd1}*{speed1}
+.param td2=1e-9*(150-10-40-10)*5/{vdd1}*{speed1}
+.param td3=1e-9*(150+20-10-40-10)*5/{vdd1}*{speed1}
+.param td4=1e-9*(10)*5/{vdd1}*{speed1}
+*
+XIN1  S Si  VDD VGND  CD40_IN_1  vdd2={vdd1}  speed2={speed1}  tripdt2={tripdt1} 
+XIN2  C Ci  VDD VGND  CD40_IN_1  vdd2={vdd1}  speed2={speed1}  tripdt2={tripdt1} 
+XIN3  D Di  VDD VGND  CD40_IN_1  vdd2={vdd1}  speed2={speed1}  tripdt2={tripdt1} 
+XIN4  R Ri  VDD VGND  CD40_IN_1  vdd2={vdd1}  speed2={speed1}  tripdt2={tripdt1} 
+*
+ACDEL  Ci 0 0  0  0   0   Cp 0  BUF  tripdt={tripdt1}  td={td1} 
+ADDEL  Di 0 0  0  0   0   Dp 0  BUF  tripdt={tripdt1}  td={td3} 
+ARINV  Ri 0 0  0  0   0   Rp  0  BUF  tripdt={tripdt1}  td={td2}
+ASINV  Si 0 0  0  0   0   Sp  0  BUF  tripdt={tripdt1}  td={td2}
+A1     Di 0 Cp Sp Rp  QNi Qi0 0  DFLOP  tripdt={tripdt1} td={td4}
+* Force Q=high if R AND S are high.
+ASDEL  Sp 0 0  0  0   0   Sp1 0  BUF   tripdt={tripdt1} td={td4}
+AD     Qi0 Sp1 0 0 0  0   Qi  0  OR   tripdt={tripdt1}
+*
+XOUT1  Qi  Q   VDD VGND  CD40_OUT_1X  vdd2={vdd1} speed2={speed1}  tripdt2={tripdt1}
+XOUT2  QNi QN  VDD VGND  CD40_OUT_1X  vdd2={vdd1} speed2={speed1}  tripdt2={tripdt1}
+.ends
+*
